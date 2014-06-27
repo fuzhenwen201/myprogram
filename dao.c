@@ -5,7 +5,9 @@
 #include <fcntl.h>
 #include <stdlib.h>
 //定义一个文件来存储帐号
-const char* ID_FILE = "id.dat"; 
+
+
+const char* ID_FILE = "fuzhenwenid.dat"; 
 //生成不重复的帐号
 int generator_id(){
 	static int x = 100000;
