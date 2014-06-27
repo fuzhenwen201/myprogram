@@ -8,6 +8,7 @@
 #include <string.h>
 
 static int msgid1;//定义两个接受消息队列的id的变量
+static int msgid3;
 static int msgid2;
 //获取消息队列函数,
 void getID(){
