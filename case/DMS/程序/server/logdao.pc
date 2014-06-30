@@ -1,0 +1,70 @@
+#include "logdao.h"
+#include <cstring>
+#include <ctime>
+#include <cstdio>
+exec sql include sqlca;
+exec sql begin declare section;
+	char userpass[30];
+	/*重新定义一个结构体 和数据库的表结构做对应*/
+	/*        create table logrec_table(id number primary key,logname varchar2(32),pid number,logintime date,logouttime date,durations number,logip varchar2(257),severip varchae2(20));  */
+	/* create sequence logrec_table_idseq;  */
+	struct DbLogRec
+	{
+		char logname[32];
+		int pid;
+		char logintime[50];
+		char logouttime[50];
+		int durations;
+		char logip[257];
+		char serverip[20];
+	};
+	struct DbLogRec dblog;
+exec sql end declare section;
+void LogDao::connectDb(const char* userpasswd)//连接数据库
+{
+	strcpy(userpass,userpasswd);
+	exec sql connect:userpass;
+}
+
+void LogDao::saveData(MatchedLogRec mlog)//保存数据
+{
+	/*把mlog中的数据赋值给dblog*/
+	strcpy(dblog.logname,mlog.logname);
+	dblog.pid = mlog.pid;
+	/*将int型转换成date型*/
+	 time_t t = mlog.logintime;
+	 struct tm *mytm = localtime(&t);
+	 sprintf(dblog.logintime,"%4d-%02d-%02d %02d:%02d:%02d",mytm->tm_year+1900,mytm->tm_mon+1,mytm->tm_mday,mytm->tm_hour,
+			 mytm->tm_min,mytm->tm_sec);
+
+		t = mlog.logouttime;
+		mytm = localtime(&t);
+	 sprintf(dblog.logouttime,"%4d-%02d-%02d %02d:%02d:%02d",mytm->tm_year+1900,mytm->tm_mon+1,mytm->tm_mday,mytm->tm_hour,
+			 mytm->tm_min,mytm->tm_sec);
+	 
+	 dblog.durations = mlog.durations;
+	 strcpy(dblog.logip,mlog.logip);
+	 strcpy(dblog.serverip,mlog.serverip);
+	
+	 /*执行sql 把数据存入数据库*/
+	 exec sql insert into logrec_table vaules(logrec_table_idseq.nextval,:dblog.logname,:dblog.pid,
+			 to_date(:dblog.logintime,'yyyy-mm-dd hh24:mi:ss'),to_date(:dblog.logouttime,'yyyy-mm-dd hh24:mi:ss'),
+			 :dblog.durations,:dblog.logip,:dblog.serverip);
+}
+void LogDao::commit()//确认
+{
+	exec sql commit;
+}
+void LogDao::disconnect()//断开连接
+{
+	exec sql commit work release;
+}
+
+
+
+
+
+
+
+
+

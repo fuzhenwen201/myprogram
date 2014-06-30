@@ -1,0 +1,6 @@
+server:
+	gcc server.c bank.c -o server
+client:
+	gcc client.c bank.c -o client
+open:
+	gcc open.c bank.c dao.c -o open
